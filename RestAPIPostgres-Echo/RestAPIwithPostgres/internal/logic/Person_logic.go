@@ -7,7 +7,6 @@ import (
 	"strconv"
 )
 
-//(`INSERT INTO "person" ("person_email", "person_phone", "person_firstName", "person_lastName") VALUES ($1, $2,$3,$4)`, p.Email, p.Phone, p.FirstName, p.LastName)
 func Create(p Model.Person) error {
 	sess := Repository.Connection.NewSession(nil)
 	_, err := sess.InsertInto("person").Columns("person_email", "person_phone", "person_firstName", "person_lastName").Values(p.Email, p.Phone, p.FirstName, p.LastName).Exec()
@@ -17,7 +16,6 @@ func Create(p Model.Person) error {
 	return nil
 }
 
-//row, err := Repository.Connection.Query(`SELECT * FROM "person" WHERE "person_id" = $1`, person_id)
 func ReadOne(id string) ([]Model.Person, error) {
 	sess := Repository.Connection.NewSession(nil)
 	person_id, err := strconv.Atoi(id)
@@ -25,9 +23,17 @@ func ReadOne(id string) ([]Model.Person, error) {
 		return nil, fmt.Errorf("Error: неверно введён параметр id: %v", err)
 	}
 	personInfo := []Model.Person{}
-	err = sess.Select("*").From("person").Where("person_id = ?", person_id).LoadOne(&personInfo)
+	rows, err := sess.Select("*").From("person").Where("person_id = ?", person_id).Rows()
 	if err != nil {
 		return nil, err
+	}
+	for rows.Next() {
+		var p Model.Person
+		err := rows.Scan(&p.Id, &p.Email, &p.Phone, &p.FirstName, &p.LastName)
+		if err != nil {
+			return nil, err
+		}
+		personInfo = append(personInfo, p)
 	}
 	return personInfo, nil
 }
@@ -35,23 +41,18 @@ func ReadOne(id string) ([]Model.Person, error) {
 func Read() ([]Model.Person, error) {
 	sess := Repository.Connection.NewSession(nil)
 	personInfo := []Model.Person{}
-	_, err := sess.Select("*").From("person").OrderBy("person_id").Load(&personInfo)
+	rows, err := sess.Select("*").From("person").OrderAsc("person_id").Rows()
 	if err != nil {
 		return nil, err
 	}
-/*	row, err := Repository.Connection.Query(`SELECT * FROM "person" ORDER BY "person_id"`)
-	if err != nil {
-		return nil, err
-	}*/
-	//var personInfo = []Model.Person{}
-	/*for personInfo.Next() {
+	for rows.Next() {
 		var p Model.Person
-		err := row.Scan(&p.Id, &p.Email, &p.Phone, &p.FirstName, &p.LastName)
+		err := rows.Scan(&p.Id, &p.Email, &p.Phone, &p.FirstName, &p.LastName)
 		if err != nil {
 			return nil, err
 		}
 		personInfo = append(personInfo, p)
-	}*/
+	}
 	return personInfo, nil
 }
 
