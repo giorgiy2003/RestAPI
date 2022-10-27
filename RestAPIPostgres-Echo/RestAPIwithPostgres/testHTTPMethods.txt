@@ -6,10 +6,10 @@ curl -X POST http://localhost:8080/person -d 'email=1qq' -d 'phone=1qq'  -d 'fir
 curl http://localhost:8080/person
 
 ### Вывести пользователя по id
-curl  http://localhost:8080/person/6
+curl  http://localhost:8080/person/5
 
 ### Удалить пользователя по id
 curl -X DELETE http://localhost:8080/person/6
 
 ### Обновить запись пользователя по id
-curl -X PUT http://localhost:8080/person/6 -d 'email=Joe' -d 'phone=Joe'  -d 'firstName=Joe' -d 'lastName=112' 
+curl -X PUT http://localhost:8080/person/7 -d 'email=Joe' -d 'phone=Joe'  -d 'firstName=Joe' -d 'lastName=112' 

@@ -4,7 +4,10 @@ import (
 	"fmt"
 	Model "myapp/internal/model"
 	Repository "myapp/internal/repository"
+	"os"
 	"strconv"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func Create(p Model.Person) error {
@@ -89,4 +92,12 @@ func dataExist(id string) error {
 		return fmt.Errorf("Error: записи с id = %s не существует", id)
 	}
 	return nil
+}
+
+var Log *log.Logger
+
+func InitLogger() {
+	Log = log.New()
+	Log.SetFormatter(&log.JSONFormatter{})
+	Log.SetOutput(os.Stdout)
 }
