@@ -23,7 +23,7 @@ func ReadOne(id string) ([]Model.Person, error) {
 	sess := Repository.Connection.NewSession(nil)
 	person_id, err := strconv.Atoi(id)
 	if err != nil {
-		return nil, fmt.Errorf("Error: неверно введён параметр id: %w", err)
+		return nil, fmt.Errorf("Error: неверно введён параметр id: %v", err)
 	}
 	personInfo := []Model.Person{}
 	rows, err := sess.Select("*").From("person").Where("person_id = ?", person_id).Rows()

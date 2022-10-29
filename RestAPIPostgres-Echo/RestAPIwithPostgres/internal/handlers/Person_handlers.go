@@ -77,7 +77,8 @@ func UpdatePersonById(c echo.Context) error {
 func ConnectDB(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if err := Repository.OpenTable(); err != nil {
-			Logic.Log.Fatalf("Не удалось подключиться к базе данных: %w", err)
+			Logic.Log.Errorf("Не удалось подключиться к базе данных: %v", err)
+			return err
 		}
 		return next(c)
 	}
