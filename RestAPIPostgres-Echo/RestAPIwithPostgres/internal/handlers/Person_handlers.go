@@ -4,6 +4,7 @@ import (
 	"fmt"
 	Logic "myapp/internal/logic"
 	Model "myapp/internal/model"
+	Repository "myapp/internal/repository"
 	"net/http"
 
 	"github.com/labstack/echo"
@@ -70,4 +71,14 @@ func UpdatePersonById(c echo.Context) error {
 	}
 	Logic.Log.Infof("Запись с id = %s  успешно обновлена", id)
 	return c.JSON(http.StatusOK, fmt.Sprintf("Запись с id = %s  успешно обновлена", id))
+}
+
+//Middleware
+func ConnectDB(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		if err := Repository.OpenTable(); err != nil {
+			Logic.Log.Fatalf("Не удалось подключиться к базе данных: %w", err)
+		}
+		return next(c)
+	}
 }

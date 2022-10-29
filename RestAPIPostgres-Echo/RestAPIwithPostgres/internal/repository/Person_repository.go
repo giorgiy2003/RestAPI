@@ -2,6 +2,7 @@ package Repository
 
 import (
 	"fmt"
+
 	"github.com/gocraft/dbr"
 	_ "github.com/lib/pq"
 )
