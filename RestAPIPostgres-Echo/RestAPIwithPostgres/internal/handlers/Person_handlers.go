@@ -95,7 +95,9 @@ func check(ctx context.Context, errorCh chan error) {
 		Logic.Log.Fatalf("Timed out: %v", ctx.Err())
 		return
 	case err := <-errorCh:
-		Logic.Log.Errorf("Возникла ошибка... %v", err)
-		return
+		if err != nil {
+			Logic.Log.Fatalf("Возникла ошибка... %v", err)
+			return
+		}
 	}
 }
