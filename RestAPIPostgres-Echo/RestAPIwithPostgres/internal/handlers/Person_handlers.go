@@ -78,31 +78,26 @@ func UpdatePersonById(c echo.Context) error {
 //Middleware
 func ConnectDB(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		defer cancel()
 		errorCh := make(chan error)
-		err := Repository.OpenTable()
 		go check(ctx, errorCh)
-		//time.Sleep(3 * time.Second) //Используем для имитации долгого подключения к БД
+		err := Repository.OpenTable()
+		//time.Sleep(4 * time.Second) //Используем для имитации долгого подключения к БД
 		errorCh <- err
 		return next(c)
 	}
 }
 
 func check(ctx context.Context, errorCh chan error) {
-	for {
-		select {
-		case <-ctx.Done():
-			Logic.Log.Fatalf("Timed out: %v", ctx.Err())
+	select {
+	case <-ctx.Done():
+		Logic.Log.Fatalf("Timed out: %v", ctx.Err())
+		return
+	case err := <-errorCh:
+		if err != nil {
+			Logic.Log.Errorf("Возникла ошибка... %v", err)
 			return
-		case err := <-errorCh:
-			if err != nil {
-				Logic.Log.Errorf("Возникла ошибка... %v", err)
-				return
-			}
-		default:
-			fmt.Println("Trying to connect to database...")
-			time.Sleep(500 * time.Millisecond)
 		}
 	}
 }

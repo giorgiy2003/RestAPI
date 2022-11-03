@@ -10,7 +10,7 @@ import (
 const (
 	//host     = "database" //используем в случае подключения к базе данных из контейнера
 	host     = "127.0.0.1"
-	port     = 5432
+	port     = 543287787
 	user     = "postgres"
 	password = "4650"
 	dbname   = "postgres"
