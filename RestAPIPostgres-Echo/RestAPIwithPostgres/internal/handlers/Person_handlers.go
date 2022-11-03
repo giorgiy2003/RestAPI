@@ -1,11 +1,13 @@
 package Handler
 
 import (
+	"context"
 	"fmt"
 	Logic "myapp/internal/logic"
 	Model "myapp/internal/model"
 	Repository "myapp/internal/repository"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo"
 )
@@ -76,10 +78,31 @@ func UpdatePersonById(c echo.Context) error {
 //Middleware
 func ConnectDB(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		if err := Repository.OpenTable(); err != nil {
-			Logic.Log.Errorf("Не удалось подключиться к базе данных: %v", err)
-			return err
-		}
+		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+		defer cancel()
+		errorCh := make(chan error)
+		err := Repository.OpenTable()
+		go check(ctx, errorCh)
+		//time.Sleep(3 * time.Second) //Используем для имитации долгого подключения к БД
+		errorCh <- err
 		return next(c)
+	}
+}
+
+func check(ctx context.Context, errorCh chan error) {
+	for {
+		select {
+		case <-ctx.Done():
+			Logic.Log.Fatalf("Timed out: %v", ctx.Err())
+			return
+		case err := <-errorCh:
+			if err != nil {
+				Logic.Log.Errorf("Возникла ошибка... %v", err)
+				return
+			}
+		default:
+			fmt.Println("Trying to connect to database...")
+			time.Sleep(500 * time.Millisecond)
+		}
 	}
 }
