@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo"
+	log "github.com/sirupsen/logrus"
 )
 
 func PostPerson(c echo.Context) error {
@@ -20,20 +21,20 @@ func PostPerson(c echo.Context) error {
 	newPerson.LastName = c.FormValue("lastName")
 	err := Logic.Create(newPerson)
 	if err != nil {
-		Logic.Log.Error(err)
+		log.Error(err)
 		return c.JSON(http.StatusBadRequest, fmt.Sprint(err))
 	}
-	Logic.Log.Info("Добавлена новая запись")
+	log.Info("Добавлена новая запись")
 	return c.JSON(http.StatusCreated, newPerson)
 }
 
 func GetPersons(c echo.Context) error {
 	persons, err := Logic.Read()
 	if err != nil {
-		Logic.Log.Error(err)
+		log.Error(err)
 		return c.JSON(http.StatusBadRequest, fmt.Sprint(err))
 	}
-	Logic.Log.Info("Выведены все записи")
+	log.Info("Выведены все записи")
 	return c.JSON(http.StatusOK, persons)
 }
 
@@ -41,10 +42,10 @@ func GetById(c echo.Context) error {
 	id := c.Param("id")
 	persons, err := Logic.ReadOne(id)
 	if err != nil {
-		Logic.Log.Error(err)
+		log.Error(err)
 		return c.JSON(http.StatusBadRequest, fmt.Sprint(err))
 	}
-	Logic.Log.Infof("Выведена Запись с id = %s", id)
+	log.Infof("Выведена Запись с id = %s", id)
 	return c.JSON(http.StatusOK, persons)
 }
 
@@ -52,10 +53,10 @@ func DeleteById(c echo.Context) error {
 	id := c.Param("id")
 	err := Logic.Delete(id)
 	if err != nil {
-		Logic.Log.Error(err)
+		log.Error(err)
 		return c.JSON(http.StatusBadRequest, fmt.Sprint(err))
 	}
-	Logic.Log.Infof("Запись с id = %s  успешно удалена", id)
+	log.Infof("Запись с id = %s  успешно удалена", id)
 	return c.JSON(http.StatusOK, fmt.Sprintf("Запись с id = %s  успешно удалена", id))
 }
 
@@ -68,10 +69,10 @@ func UpdatePersonById(c echo.Context) error {
 	newPerson.LastName = c.FormValue("lastName")
 	err := Logic.Update(newPerson, id)
 	if err != nil {
-		Logic.Log.Error(err)
+		log.Error(err)
 		return c.JSON(http.StatusBadRequest, fmt.Sprint(err))
 	}
-	Logic.Log.Infof("Запись с id = %s  успешно обновлена", id)
+	log.Infof("Запись с id = %s  успешно обновлена", id)
 	return c.JSON(http.StatusOK, fmt.Sprintf("Запись с id = %s  успешно обновлена", id))
 }
 
@@ -92,11 +93,11 @@ func ConnectDB(next echo.HandlerFunc) echo.HandlerFunc {
 func check(ctx context.Context, errorCh chan error) {
 	select {
 	case <-ctx.Done():
-		Logic.Log.Fatalf("Timed out: %v", ctx.Err())
+		log.Fatalf("Timed out: %v", ctx.Err())
 		return
 	case err := <-errorCh:
 		if err != nil {
-			Logic.Log.Fatalf("Возникла ошибка... %v", err)
+			log.Fatalf("Возникла ошибка... %v", err)
 			return
 		}
 	}
